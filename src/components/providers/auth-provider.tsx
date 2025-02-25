@@ -59,6 +59,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = (newToken: string, userId: string) => {
     localStorage.setItem('token', newToken);
+    localStorage.setItem('userId', userId);
     document.cookie = `token=${newToken}; path=/; max-age=${60 * 60 * 24 * 7}`;
     setToken(newToken);
     setIsAuthenticated(true);

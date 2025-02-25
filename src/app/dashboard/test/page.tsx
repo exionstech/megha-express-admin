@@ -1,4 +1,5 @@
 'use client';
+
 import { axiosInstance } from '@/lib/axios';
 import React, { useEffect } from 'react';
 
@@ -7,7 +8,7 @@ const Page = () => {
     const get = async () => {
       try {
         const response = await axiosInstance
-          .get('/user')
+          .get(`/user/${localStorage.getItem('userId')}`)
           .then((data) => data.data)
           .catch((e) => console.log(e));
 
