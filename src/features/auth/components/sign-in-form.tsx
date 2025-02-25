@@ -52,7 +52,7 @@ export default function SignInForm({ onToggle }: { onToggle: () => void }) {
         return;
       }
 
-      login(response.data.token);
+      login(response.data.token, response.data.userId);
       toast.success('Signed in successfully!');
     } catch (error) {
       toast.error('Invalid credentials, try again.');

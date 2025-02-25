@@ -7,7 +7,7 @@ import { useRouter, usePathname } from 'next/navigation';
 type AuthContextType = {
   isAuthenticated: boolean;
   token: string | null;
-  login: (token: string) => void;
+  login: (token: string, userId: string) => void;
   logout: () => void;
 };
 
@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [pathname, isAuthenticated, router]);
 
-  const login = (newToken: string) => {
+  const login = (newToken: string, userId: string) => {
     localStorage.setItem('token', newToken);
     document.cookie = `token=${newToken}; path=/; max-age=${60 * 60 * 24 * 7}`;
     setToken(newToken);
@@ -66,6 +66,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('userId');
     document.cookie = 'token=; path=/; max-age=0';
     setToken(null);
     setIsAuthenticated(false);
