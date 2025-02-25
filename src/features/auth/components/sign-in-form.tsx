@@ -15,6 +15,8 @@ import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
 import { toast } from 'sonner';
 import * as z from 'zod';
+import axios from 'axios';
+import { useAuth } from '@/components/providers/auth-provider';
 
 // Validation Schema
 const signInSchema = z.object({
@@ -27,6 +29,7 @@ type SignInFormValues = z.infer<typeof signInSchema>;
 
 export default function SignInForm({ onToggle }: { onToggle: () => void }) {
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
 
   const form = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
@@ -36,7 +39,20 @@ export default function SignInForm({ onToggle }: { onToggle: () => void }) {
   const onSubmit = async (data: SignInFormValues) => {
     setLoading(true);
     try {
-      console.log('Sign In data:', data);
+      const response = await axios.post(
+        'https://megha-backend.exionstech.workers.dev/api/auth/login',
+        {
+          email: data.email,
+          password: data.password
+        }
+      );
+
+      if (!response.data.success) {
+        toast.error(response.data.message);
+        return;
+      }
+
+      login(response.data.token);
       toast.success('Signed in successfully!');
     } catch (error) {
       toast.error('Invalid credentials, try again.');
@@ -49,7 +65,7 @@ export default function SignInForm({ onToggle }: { onToggle: () => void }) {
     <div className='w-full max-w-md'>
       <h2 className='text-center text-2xl font-bold'>Welcome Back</h2>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 mt-6'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='mt-6 space-y-4'>
           <FormField
             control={form.control}
             name='email'
@@ -87,7 +103,7 @@ export default function SignInForm({ onToggle }: { onToggle: () => void }) {
           <Button
             type='submit'
             disabled={loading}
-            className='bg-brand-400 hover:bg-brand-400/80 mt-2 w-full text-white transition active:scale-95'
+            className='mt-2 w-full bg-brand-400 text-white transition hover:bg-brand-400/80 active:scale-95'
           >
             Sign In
           </Button>
@@ -96,7 +112,7 @@ export default function SignInForm({ onToggle }: { onToggle: () => void }) {
             <button
               type='button'
               onClick={onToggle}
-              className='text-brand-400 font-medium hover:underline'
+              className='font-medium text-brand-400 hover:underline'
             >
               Sign Up
             </button>

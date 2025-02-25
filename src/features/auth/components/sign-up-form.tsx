@@ -15,11 +15,13 @@ import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
 import { toast } from 'sonner';
 import * as z from 'zod';
+import axios from 'axios';
 
 // Validation Schema
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
 const signUpSchema = z
   .object({
+    name: z.string(),
     email: z.string().email({ message: 'Enter a valid email address' }),
     password: z
       .string()
@@ -43,13 +45,27 @@ export default function SignUpForm({ onToggle }: { onToggle: () => void }) {
 
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
-    defaultValues: { email: '', password: '', confirmPassword: '' }
+    defaultValues: { name: '', email: '', password: '', confirmPassword: '' }
   });
 
   const onSubmit = async (data: SignUpFormValues) => {
     setLoading(true);
     try {
-      console.log('Sign Up data:', data);
+      const response = await axios.post(
+        'https://megha-backend.exionstech.workers.dev/api/auth/register',
+        {
+          id: 'MEX123459',
+          name: data.name,
+          email: data.email,
+          password: data.password
+        }
+      );
+
+      if (!response.data.success) {
+        toast.error(response.data.message);
+        return;
+      }
+
       toast.success('Account created successfully!');
       onToggle(); // Switch to Sign In after sign up
     } catch (error) {
@@ -64,6 +80,23 @@ export default function SignUpForm({ onToggle }: { onToggle: () => void }) {
       <h2 className='text-center text-2xl font-bold'>Create a Hub Account</h2>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='mt-6 space-y-4'>
+          <FormField
+            control={form.control}
+            name='name'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder='Enter your name'
+                    disabled={loading}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name='email'
@@ -118,7 +151,7 @@ export default function SignUpForm({ onToggle }: { onToggle: () => void }) {
           <Button
             type='submit'
             disabled={loading}
-            className='bg-brand-400 hover:bg-brand-400/80 mt-2 w-full text-white transition active:scale-95'
+            className='mt-2 w-full bg-brand-400 text-white transition hover:bg-brand-400/80 active:scale-95'
           >
             Sign Up
           </Button>
@@ -127,7 +160,7 @@ export default function SignUpForm({ onToggle }: { onToggle: () => void }) {
             <button
               type='button'
               onClick={onToggle}
-              className='text-brand-400 font-medium hover:underline'
+              className='font-medium text-brand-400 hover:underline'
             >
               Sign In
             </button>
